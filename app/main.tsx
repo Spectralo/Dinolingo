@@ -1,5 +1,3 @@
-import { View } from "react-native";
-import { Text } from "react-native-paper";
 import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
 const Tab = createMaterialBottomTabNavigator();
 import { MaterialIcons } from "@expo/vector-icons";

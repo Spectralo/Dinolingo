@@ -5,16 +5,20 @@ import * as Linking from "expo-linking";
 import {
   NavigationContainer,
   DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
   useRoute,
+  useTheme,
 } from "@react-navigation/native";
 import { adaptNavigationTheme, ActivityIndicator } from "react-native-paper";
 import { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
 import { View } from "react-native";
-import { reloadAppAsync } from "expo";
+import { useColorScheme } from "react-native";
+import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 
 const prefix = Linking.createURL("/");
-const { DarkTheme } = adaptNavigationTheme({
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
+  reactNavigationLight: NavigationDefaultTheme,
   reactNavigationDark: NavigationDarkTheme,
 });
 
@@ -32,10 +36,12 @@ export default function App() {
     },
   };
 
+  let navTheme = useColorScheme() === "dark" ? DarkTheme : LightTheme;
   // Check params
 
   const route = useRoute();
   const parameters = route.params || {};
+  const theme = useTheme();
 
   async function save(key: any, value: any) {
     setLoading(true);
@@ -51,12 +57,13 @@ export default function App() {
   useEffect(() => {
     if (parameters.token) {
       save("token", parameters.token);
-      reloadAppAsync();
+      setIsAuthenticated(true);
     }
   }, [parameters.token]);
 
   useEffect(() => {
     // Check for the token in SecureStore
+    setLoading(true);
     const checkToken = async () => {
       try {
         const token = await SecureStore.getItemAsync("token");
@@ -77,6 +84,7 @@ export default function App() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
+          backgroundColor: theme.colors.background,
         }}
       >
         <ActivityIndicator size="large" />
@@ -85,7 +93,7 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer independent={true} linking={linking} theme={DarkTheme}>
+    <NavigationContainer independent={true} linking={linking} theme={navTheme}>
       <Stack.Navigator>
         {isAuthenticated ? (
           <Stack.Screen name="Main" component={MainScreen} />
