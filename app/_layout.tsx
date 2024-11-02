@@ -1,9 +1,5 @@
 import { Slot } from "expo-router";
-import {
-  MD3DarkTheme,
-  PaperProvider,
-  adaptNavigationTheme,
-} from "react-native-paper";
+import { PaperProvider, adaptNavigationTheme } from "react-native-paper";
 
 // Navigation bar transparent
 import * as NavigationBar from "expo-navigation-bar";

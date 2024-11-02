@@ -1,38 +1,19 @@
 import { View, Image } from "react-native";
 import { Text, Button, useTheme } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { useEffect } from "react";
 import * as WebBrowser from "expo-web-browser";
-import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
+import { useNavigation } from "@react-navigation/native";
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Endpoint
-const discovery = {
-  authorizationEndpoint: "https://slack.com/oauth/authorize",
-  tokenEndpoint: "https://slack.com/api/oauth.access",
-};
+function promptAsync() {
+  WebBrowser.openAuthSessionAsync(
+    "https://dino.spectralo.hackclub.app/oauth/start",
+  );
+}
 
 export default function Index() {
   const theme = useTheme();
-  const navigation = useNavigation();
 
-  const [request, response, promptAsync] = useAuthRequest(
-    {
-      clientId: "CLIENT_ID",
-      scopes: ["emoji:read"],
-      redirectUri: makeRedirectUri({
-        scheme: "your.app",
-      }),
-    },
-    discovery,
-  );
-
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { code } = response.params;
-    }
-  }, [response]);
   return (
     <View
       style={{
