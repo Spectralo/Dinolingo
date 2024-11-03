@@ -1,6 +1,7 @@
 import { createMaterialBottomTabNavigator } from "react-native-paper/react-navigation";
 const Tab = createMaterialBottomTabNavigator();
 import { MaterialIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Tabs imports
 import Draw from "./(tabs)/draw";
@@ -8,8 +9,13 @@ import Explore from "./(tabs)/explore";
 import Settings from "./(tabs)/settings";
 
 export default function Home() {
+  const insets = useSafeAreaInsets();
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      style={{
+        paddingTop: insets.top,
+      }}
+    >
       <Tab.Screen
         name="Draw"
         component={Draw}

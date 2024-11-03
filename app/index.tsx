@@ -96,7 +96,11 @@ export default function App() {
     <NavigationContainer independent={true} linking={linking} theme={navTheme}>
       <Stack.Navigator>
         {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainScreen} />
+          <Stack.Screen
+            name="Main"
+            component={MainScreen}
+            options={{ headerShown: false }}
+          />
         ) : (
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
         )}
