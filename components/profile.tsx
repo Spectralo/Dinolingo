@@ -1,7 +1,39 @@
-import { View, Image } from "react-native";
+import { View } from "react-native";
+import FastImage from "react-native-fast-image";
 import { Text, Button } from "react-native-paper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LogOut from "../scripts/logout";
+import Fetch from "../scripts/fetch";
+import { useNavigation, CommonActions } from "@react-navigation/native";
+
+let avatarURL = "";
+
+const getAvatar = async () => {
+  Fetch;
+  try {
+    const value = await AsyncStorage.getItem("avatar");
+    if (value !== null) {
+      avatarURL = value;
+      console.log(value);
+    } else {
+      avatarURL = "https://placehold.co/50x50";
+      console.log("avatar not found, thats strange :thinkies:");
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+getAvatar();
 
 export function Profile() {
+  const navigation = useNavigation();
+
+  const LogOutComplete = async () => {
+    LogOut;
+    expo.reloadAppAsync("logout");
+  };
+
   return (
     <View
       style={{
@@ -21,8 +53,10 @@ export function Profile() {
         }}
       >
         <Text variant="titleLarge">User Name</Text>
-        <Image
-          source={require("../assets/images/avatar.jpeg")}
+        <FastImage
+          source={{
+            uri: avatarURL,
+          }}
           style={{
             width: 50,
             height: 50,
@@ -30,8 +64,15 @@ export function Profile() {
           }}
         />
       </View>
-      <Button mode="elevated">
+      <Button mode="elevated" onPress={LogOutComplete}>
         <Text>Log Out</Text>
+      </Button>
+      <Button
+        mode="elevated"
+        onPress={() => getAvatar()}
+        style={{ marginTop: 10 }}
+      >
+        <Text>ReFetch (Debug)</Text>
       </Button>
     </View>
   );

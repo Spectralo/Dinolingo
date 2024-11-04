@@ -22,6 +22,9 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationDark: NavigationDarkTheme,
 });
 
+// Scripts imports
+import Fetch from "../scripts/fetch";
+
 export default function App() {
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,6 +59,7 @@ export default function App() {
 
   useEffect(() => {
     if (parameters.token) {
+      console.log(parameters.token);
       save("token", parameters.token);
       setIsAuthenticated(true);
     }
@@ -67,7 +71,9 @@ export default function App() {
     const checkToken = async () => {
       try {
         const token = await SecureStore.getItemAsync("token");
-        setIsAuthenticated(!!token); // If token exists, set authenticated to true
+        Fetch;
+        setIsAuthenticated(!!token);
+        // If token exists, set authenticated to true
       } catch (e) {
         console.log("Error retrieving token:", e);
       } finally {
