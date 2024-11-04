@@ -4,36 +4,20 @@ import { Text, Button } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LogOut from "../scripts/logout";
 import Fetch from "../scripts/fetch";
-import { useNavigation, CommonActions } from "@react-navigation/native";
 
-let avatarURL = "";
+let avatarUrl: string;
+let name: any;
 
-const getAvatar = async () => {
-  Fetch;
-  try {
-    const value = await AsyncStorage.getItem("avatar");
-    if (value !== null) {
-      avatarURL = value;
-      console.log(value);
-    } else {
-      avatarURL = "https://placehold.co/50x50";
-      console.log("avatar not found, thats strange :thinkies:");
-    }
-  } catch (e) {
-    console.log(e);
-  }
+async function getInfo() {
+  name = await AsyncStorage.getItem("name");
+}
+
+const LogOutComplete = async () => {
+  LogOut;
+  expo.reloadAppAsync("logout");
 };
 
-getAvatar();
-
 export function Profile() {
-  const navigation = useNavigation();
-
-  const LogOutComplete = async () => {
-    LogOut;
-    expo.reloadAppAsync("logout");
-  };
-
   return (
     <View
       style={{
@@ -52,10 +36,10 @@ export function Profile() {
           width: "100%",
         }}
       >
-        <Text variant="titleLarge">User Name</Text>
+        <Text variant="titleLarge">@{name}</Text>
         <FastImage
           source={{
-            uri: avatarURL,
+            uri: avatarUrl,
           }}
           style={{
             width: 50,
@@ -67,11 +51,7 @@ export function Profile() {
       <Button mode="elevated" onPress={LogOutComplete}>
         <Text>Log Out</Text>
       </Button>
-      <Button
-        mode="elevated"
-        onPress={() => getAvatar()}
-        style={{ marginTop: 10 }}
-      >
+      <Button mode="elevated" onPress={Fetch} style={{ marginTop: 10 }}>
         <Text>ReFetch (Debug)</Text>
       </Button>
     </View>

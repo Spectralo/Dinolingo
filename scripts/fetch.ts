@@ -8,6 +8,7 @@ async function getToken() {
 }
 
 export default async function fetch() {
+  console.log("Fetching user data");
   let token = await getToken();
 
   axios
@@ -17,9 +18,11 @@ export default async function fetch() {
       },
     })
     .then((response) => {
+      console.log(response.data);
       AsyncStorage.setItem(
         "avatar",
         JSON.stringify(response.data["https://slack.com/user_image_72"]),
       );
+      AsyncStorage.setItem("name", JSON.stringify(response.data.name));
     });
 }
