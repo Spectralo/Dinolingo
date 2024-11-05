@@ -1,23 +1,34 @@
+import * as React from "react";
 import { View } from "react-native";
 import FastImage from "react-native-fast-image";
 import { Text, Button } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LogOut from "../scripts/logout";
-import Fetch from "../scripts/fetch";
-
-let avatarUrl: string;
-let name: any;
-
-async function getInfo() {
-  name = await AsyncStorage.getItem("name");
-}
-
-const LogOutComplete = async () => {
-  LogOut;
-  expo.reloadAppAsync("logout");
-};
 
 export function Profile() {
+  const [pseudo, setPseudo] = React.useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+
+  // Fetch avatar and name once when component mounts
+  React.useEffect(() => {
+    const fetchData = async () => {
+      let name = await AsyncStorage.getItem("name");
+      let avatar = await AsyncStorage.getItem("avatar");
+      name = name.slice(1, -1);
+      avatar = avatar.slice(1, -1);
+      setPseudo(name);
+      setAvatarUrl(avatar);
+      console.log("Stored avatar:", avatar);
+      console.log("Stored name:", name);
+    };
+    fetchData();
+  }, []);
+
+  const handleLogout = async () => {
+    await LogOut(); // Ensure this function is called
+    // Navigate to login or reset app state here instead of reloading the app
+  };
+
   return (
     <View
       style={{
@@ -36,23 +47,20 @@ export function Profile() {
           width: "100%",
         }}
       >
-        <Text variant="titleLarge">@{name}</Text>
-        <FastImage
-          source={{
-            uri: avatarUrl,
-          }}
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 50 / 2,
-          }}
-        />
+        <Text variant="titleLarge">{pseudo}</Text>
+        {avatarUrl && (
+          <FastImage
+            source={{ uri: avatarUrl }}
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+            }}
+          />
+        )}
       </View>
-      <Button mode="elevated" onPress={LogOutComplete}>
+      <Button mode="elevated" onPress={handleLogout}>
         <Text>Log Out</Text>
-      </Button>
-      <Button mode="elevated" onPress={Fetch} style={{ marginTop: 10 }}>
-        <Text>ReFetch (Debug)</Text>
       </Button>
     </View>
   );

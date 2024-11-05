@@ -18,7 +18,6 @@ export default async function fetch() {
       },
     })
     .then((response) => {
-      console.log(response.data);
       AsyncStorage.setItem(
         "avatar",
         JSON.stringify(response.data["https://slack.com/user_image_72"]),

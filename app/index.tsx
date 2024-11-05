@@ -9,7 +9,11 @@ import {
   useRoute,
   useTheme,
 } from "@react-navigation/native";
-import { adaptNavigationTheme, ActivityIndicator } from "react-native-paper";
+import {
+  adaptNavigationTheme,
+  ActivityIndicator,
+  PaperProvider,
+} from "react-native-paper";
 import { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
 import { View } from "react-native";
@@ -59,8 +63,8 @@ export default function App() {
 
   useEffect(() => {
     if (parameters.token) {
-      console.log(parameters.token);
       save("token", parameters.token);
+      Fetch();
       setIsAuthenticated(true);
     }
   }, [parameters.token]);
@@ -71,7 +75,7 @@ export default function App() {
     const checkToken = async () => {
       try {
         const token = await SecureStore.getItemAsync("token");
-        Fetch;
+        Fetch();
         setIsAuthenticated(!!token);
         // If token exists, set authenticated to true
       } catch (e) {

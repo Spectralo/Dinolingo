@@ -1,5 +1,11 @@
 import { Text } from "react-native-paper";
 import { View } from "react-native";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
+import React, { useState } from "react";
 
 export default function Draw() {
   return (
@@ -9,8 +15,6 @@ export default function Draw() {
         justifyContent: "center",
         alignItems: "center",
       }}
-    >
-      <Text>Draw Screen</Text>
-    </View>
+    ></View>
   );
 }
