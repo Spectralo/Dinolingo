@@ -1,7 +1,7 @@
 # Dinolingo 🦖🌸✨
 
 Dinolingo is an Android/IOS app that learn hackers how to draw dinos and do it everyday. \
-Keep your streak or dino will come ...
+Keep your streak or dino will come ... (he's actually nice :) ) 
 
 ## Installation
 
