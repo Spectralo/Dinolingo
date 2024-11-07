@@ -28,6 +28,7 @@ const { LightTheme, DarkTheme } = adaptNavigationTheme({
 
 // Scripts imports
 import Fetch from "../scripts/fetch";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function App() {
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,8 @@ export default function App() {
     if (parameters.token) {
       save("token", parameters.token);
       Fetch();
+      AsyncStorage.setItem("streak", "0");
+      AsyncStorage.setItem("lovecoins", "0");
       setIsAuthenticated(true);
     }
   }, [parameters.token]);

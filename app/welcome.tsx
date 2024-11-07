@@ -2,6 +2,7 @@ import { View, Image } from "react-native";
 import { Text, Button, useTheme } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import { useNavigation } from "@react-navigation/native";
+import FastImage from "react-native-fast-image";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -19,7 +20,7 @@ export default function Index() {
       style={{
         flex: 1,
         justifyContent: "center",
-        alignItems: "start",
+        alignItems: "flex-start",
         marginHorizontal: 50,
       }}
     >
@@ -31,9 +32,9 @@ export default function Index() {
           alignItems: "center",
         }}
       >
-        <Image
+        <FastImage
           source={require("../assets/images/dinowave.png")}
-          style={{ width: 300, height: 300, borderRadius: 1000 }}
+          style={{ width: 290, height: 300, borderRadius: 1000 }}
           resizeMode="contain"
         />
       </View>
@@ -41,7 +42,7 @@ export default function Index() {
         You haven't practiced your dino drawing yet. Sign up or else...
       </Text>
       <Button
-        style={{ alignItems: "end", marginTop: 40 }}
+        style={{ alignItems: "center", marginTop: 40, width: "100%" }}
         mode="elevated"
         onPress={() => {
           promptAsync();

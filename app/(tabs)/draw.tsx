@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { View, GestureResponderEvent } from "react-native";
-import { Canvas, Path } from "@shopify/react-native-skia";
-import { FAB } from "react-native-paper";
+import { Canvas, Path, useTouchHandler } from "@shopify/react-native-skia";
+import { Button, FAB } from "react-native-paper";
+import Header from "../../components/header";
+import { useTheme } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Text } from "react-native-paper";
+import FastImage from "react-native-fast-image";
 
 interface IPath {
   segments: string[];
@@ -10,6 +15,14 @@ interface IPath {
 
 export default function Draw() {
   const [paths, setPaths] = useState<IPath[]>([]);
+  const [streak, setStreak] = useState<number | null>(null);
+  let starting: Boolean = false;
+
+  const fetchStreak = async () => {
+    let streakstr = await AsyncStorage.getItem("streak");
+    let streak = parseInt(streakstr);
+    setStreak(streak);
+  };
 
   const handleTouchStart = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
@@ -41,8 +54,40 @@ export default function Draw() {
     setPaths((prevPaths) => prevPaths.slice(0, -1));
   };
 
+  console.log(streak);
+
+  if (streak == 0 || streak == null) {
+    return (
+      <View style={{ flex: 1 }}>
+        <Header />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <FastImage
+            source={require("../../assets/images/crying_dino.png")}
+            style={{ width: 300, height: 300, margin: 10, borderRadius: 20 }}
+          />
+          <Text>Hey</Text>
+          <Button
+            mode="contained"
+            onPress={() => (starting = true)}
+            style={{ margin: 10 }}
+          >
+            {" "}
+            Draw now!!!{" "}
+          </Button>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
+      <Header />
       <View
         style={{
           flex: 1,

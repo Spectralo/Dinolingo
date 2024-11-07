@@ -25,7 +25,9 @@ export function Profile() {
   }, []);
 
   const handleLogout = async () => {
-    await LogOut(); // Ensure this function is called
+    await LogOut();
+    expo.reloadAppAsync("logout");
+    // Ensure this function is called
     // Navigate to login or reset app state here instead of reloading the app
   };
 
