@@ -18,7 +18,6 @@ import { useState, useEffect } from "react";
 import * as SecureStore from "expo-secure-store";
 import { View } from "react-native";
 import { useColorScheme } from "react-native";
-import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 
 const prefix = Linking.createURL("/");
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
@@ -68,6 +67,7 @@ export default function App() {
       Fetch();
       AsyncStorage.setItem("streak", "0");
       AsyncStorage.setItem("lovecoins", "0");
+      AsyncStorage.setItem("streakdate", Date.parse("2021-01-01").toString());
       setIsAuthenticated(true);
     }
   }, [parameters.token]);
