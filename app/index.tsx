@@ -1,6 +1,8 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import WelcomeScreen from "./welcome";
 import MainScreen from "./main";
+import Imgdetail from "./(stack)/imgdetail";
+
 import * as Linking from "expo-linking";
 import {
   NavigationContainer,
@@ -107,13 +109,20 @@ export default function App() {
 
   return (
     <NavigationContainer independent={true} linking={linking} theme={navTheme}>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
         {isAuthenticated ? (
-          <Stack.Screen
-            name="Main"
-            component={MainScreen}
-            options={{ headerShown: false }}
-          />
+          <>
+            <Stack.Screen
+              name="Main"
+              component={MainScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="imgDetail" component={Imgdetail} />
+          </>
         ) : (
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
         )}

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, GestureResponderEvent } from "react-native";
 import { Canvas, Path } from "@shopify/react-native-skia";
 import { Button, FAB, Portal, Dialog, Text } from "react-native-paper";
-import Header from "../../components/header";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FastImage from "react-native-fast-image";
 
@@ -16,6 +15,9 @@ export default function Draw() {
   const [streak, setStreak] = useState<number>(0);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [drawingSent, setDrawingSent] = useState(false);
+  const [drawing, setDrawing] = useState(false);
+
+  const skiaViewRef = useRef(null); // Add a ref to the Canvas
 
   useEffect(() => {
     const fetchStreakData = async () => {
@@ -29,6 +31,12 @@ export default function Draw() {
         new Date(streakDateStr || "").getDate() !== new Date().getDate();
       setDrawingSent(!isNewDay && sentStatus);
       setStreak(storedStreak);
+
+      let lastSentDate = await AsyncStorage.getItem("streakdate");
+
+      if (lastSentDate == new Date().getDate().toString()) {
+        setDrawingSent(true);
+      }
     };
     fetchStreakData();
   }, []);
@@ -61,24 +69,68 @@ export default function Draw() {
   const sendDrawing = async () => {
     setIsDialogVisible(false);
     setDrawingSent(true);
-    setStreak(streak + 1);
 
-    await AsyncStorage.multiSet([
-      ["drawingsent", "true"],
-      ["streak", (streak + 1).toString()],
-      ["streakdate", new Date().toString()],
-    ]);
+    // Get the canvas image as a snapshot
+    const image = skiaViewRef.current?.makeImageSnapshot();
+    if (!image) {
+      console.error("Failed to capture image snapshot");
+      return;
+    }
+
+    // Encode the image to base64
+    const base64Image = image.encodeToBase64();
+    if (!base64Image) {
+      console.error("Failed to encode image to base64");
+      return;
+    }
+
+    let name = await AsyncStorage.getItem("name");
+
+    // Provide a default value if name is null
+    const authorName = name || "Unknown Author";
+
+    // Create a FormData object and append the base64 image
+    const formData = new FormData();
+    formData.append("file", base64Image);
+
+    // Append the author's name
+    formData.append("author", authorName);
+
+    // Send the form data to your server
+    try {
+      const response = await fetch(
+        "https://dino.spectralo.hackclub.app/upload",
+        {
+          method: "POST",
+          body: formData,
+          // When using FormData, you typically don't need to set the 'Content-Type' header
+        },
+      );
+      const resultText = await response.text();
+      console.log("Upload successful:", resultText);
+      const today = new Date();
+      const todayDate = today.getDate();
+      setStreak(streak + 1);
+
+      await AsyncStorage.multiSet([
+        ["drawingsent", "true"],
+        ["streak", (streak + 1).toString()],
+        ["streakdate", todayDate.toString()],
+      ]);
+    } catch (error) {
+      console.error("ptdr ça a crashé", error);
+    }
   };
 
   const startDrawing = () => {
     setDrawingSent(false);
+    setDrawing(true);
     setPaths([]);
   };
 
   return (
     <View style={{ flex: 1 }}>
-      <Header />
-      {streak === 0 ? (
+      {streak === 0 && drawing == false ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -86,8 +138,11 @@ export default function Draw() {
             source={require("../../assets/images/crying_dino.png")}
             style={{ width: 300, height: 300, margin: 10, borderRadius: 20 }}
           />
-          <Text variant="headlineSmall" style={{ marginTop: 50 }}>
-            You made the dino cry ...
+          <Text
+            variant="headlineSmall"
+            style={{ marginTop: 50, textAlign: "center", marginHorizontal: 20 }}
+          >
+            You broke your streak! Draw a dino to make them happy again!
           </Text>
           <Button
             mode="contained"
@@ -105,8 +160,27 @@ export default function Draw() {
             source={require("../../assets/images/happy_dino.png")}
             style={{ width: 300, height: 300, margin: 10, borderRadius: 20 }}
           />
-          <Text variant="headlineSmall" style={{ marginTop: 50 }}>
-            You made the dino happy! Your streak is now {streak}
+          <Text
+            variant="headlineSmall"
+            style={{
+              marginTop: 50,
+              textAlign: "center",
+              fontWeight: "bold",
+              marginHorizontal: 20,
+            }}
+          >
+            You made the dino happy! You drew dinos for {streak} days!!
+          </Text>
+          <Text
+            variant="headlineSmall"
+            style={{
+              fontStyle: "italic",
+              textAlign: "center",
+              marginHorizontal: 20,
+              marginTop: 10,
+            }}
+          >
+            You'll come back right?????
           </Text>
         </View>
       ) : (
@@ -118,7 +192,7 @@ export default function Draw() {
             onResponderStart={handleTouchStart}
             onResponderMove={handleTouchMove}
           >
-            <Canvas style={{ flex: 1 }}>
+            <Canvas ref={skiaViewRef} style={{ flex: 1 }}>
               {paths.map((path, index) => (
                 <Path
                   key={index}

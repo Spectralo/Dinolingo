@@ -8,9 +8,11 @@ import LogOut from "../scripts/logout";
 export function Profile() {
   const [pseudo, setPseudo] = React.useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
+  const [streakText, setStreakText] = React.useState<string | null>(null);
 
   // Fetch avatar and name once when component mounts
   React.useEffect(() => {
+    let streak: string | null = null;
     const fetchData = async () => {
       let name = await AsyncStorage.getItem("name");
       let avatar = await AsyncStorage.getItem("avatar");
@@ -20,7 +22,18 @@ export function Profile() {
       setAvatarUrl(avatar);
       console.log("Stored avatar:", avatar);
       console.log("Stored name:", name);
+
+      console.log(streak);
+      streak = await AsyncStorage.getItem("streak");
+
+      function fireEmmojis(days: string) {
+        let daysint = parseInt(days);
+        return "fire".repeat(Math.round(daysint / 10)).toString();
+      }
+
+      setStreakText(streak + " days long !" + fireEmmojis(streak || "0"));
     };
+
     fetchData();
   }, []);
 
@@ -34,7 +47,6 @@ export function Profile() {
   return (
     <View
       style={{
-        flex: 1,
         justifyContent: "flex-start",
         flexDirection: "column",
       }}
@@ -61,6 +73,15 @@ export function Profile() {
           />
         )}
       </View>
+      <Text
+        style={{
+          marginBottom: 20,
+        }}
+        variant="bodyLarge"
+      >
+        {" "}
+        Your streak is {streakText}
+      </Text>
       <Button mode="elevated" onPress={handleLogout}>
         <Text>Log Out</Text>
       </Button>
