@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, GestureResponderEvent } from "react-native";
+import { View, GestureResponderEvent, Alert } from "react-native";
 import { Canvas, Path } from "@shopify/react-native-skia";
 import { Button, FAB, Portal, Dialog, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FastImage from "react-native-fast-image";
+import * as FileSystem from "expo-file-system";
 
 interface IPath {
   segments: string[];
@@ -17,13 +18,14 @@ export default function Draw() {
   const [drawingSent, setDrawingSent] = useState(false);
   const [drawing, setDrawing] = useState(false);
 
-  const skiaViewRef = useRef(null); // Add a ref to the Canvas
+  const skiaViewRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchStreakData = async () => {
       const streakDateStr = await AsyncStorage.getItem("streakdate");
       const storedStreak = parseInt(
         (await AsyncStorage.getItem("streak")) || "0",
+        10,
       );
       const sentStatus = (await AsyncStorage.getItem("drawingsent")) === "true";
 
@@ -34,7 +36,7 @@ export default function Draw() {
 
       let lastSentDate = await AsyncStorage.getItem("streakdate");
 
-      if (lastSentDate == new Date().getDate().toString()) {
+      if (lastSentDate === new Date().getDate().toString()) {
         setDrawingSent(true);
       }
     };
@@ -66,59 +68,59 @@ export default function Draw() {
 
   const handleUndo = () => setPaths((prevPaths) => prevPaths.slice(0, -1));
 
-  const sendDrawing = async () => {
+  const saveDrawing = async () => {
     setIsDialogVisible(false);
     setDrawingSent(true);
 
-    // Get the canvas image as a snapshot
-    const image = skiaViewRef.current?.makeImageSnapshot();
-    if (!image) {
-      console.error("Failed to capture image snapshot");
-      return;
-    }
-
-    // Encode the image to base64
-    const base64Image = image.encodeToBase64();
-    if (!base64Image) {
-      console.error("Failed to encode image to base64");
-      return;
-    }
-
-    let name = await AsyncStorage.getItem("name");
-
-    // Provide a default value if name is null
-    const authorName = name || "Unknown Author";
-
-    // Create a FormData object and append the base64 image
-    const formData = new FormData();
-    formData.append("file", base64Image);
-
-    // Append the author's name
-    formData.append("author", authorName);
-
-    // Send the form data to your server
     try {
-      const response = await fetch(
-        "https://dino.spectralo.hackclub.app/upload",
-        {
-          method: "POST",
-          body: formData,
-          // When using FormData, you typically don't need to set the 'Content-Type' header
-        },
-      );
-      const resultText = await response.text();
-      console.log("Upload successful:", resultText);
-      const today = new Date();
-      const todayDate = today.getDate();
-      setStreak(streak + 1);
+      const image = skiaViewRef.current?.makeImageSnapshot();
+      if (!image) {
+        console.error("Failed to capture image snapshot");
+        Alert.alert("Error", "Failed to capture image snapshot.");
+        return;
+      }
 
+      const pngBase64 = image.encodeToBase64();
+
+      if (!pngBase64) {
+        console.error("Failed to encode image to base64");
+        Alert.alert("Error", "Failed to encode image to base64.");
+        return;
+      }
+
+      const directory = `${FileSystem.documentDirectory}drawings/`;
+      const today = new Date();
+      const todayDate = `${today.getFullYear()}-${String(
+        today.getMonth() + 1,
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const fileUri = `${directory}drawing_${todayDate}.png`;
+
+      const dirInfo = await FileSystem.getInfoAsync(directory);
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
+      }
+
+      await FileSystem.writeAsStringAsync(fileUri, pngBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const existingDrawings = await AsyncStorage.getItem("drawings");
+      let drawings: string[] = [];
+      if (existingDrawings) drawings = JSON.parse(existingDrawings);
+      drawings.push(fileUri);
+      await AsyncStorage.setItem("drawings", JSON.stringify(drawings));
+
+      setStreak(streak + 1);
       await AsyncStorage.multiSet([
         ["drawingsent", "true"],
         ["streak", (streak + 1).toString()],
-        ["streakdate", todayDate.toString()],
+        ["streakdate", todayDate],
       ]);
+
+      setPaths([]);
     } catch (error) {
-      console.error("ptdr ça a crashé", error);
+      console.error("Error saving drawing:", error);
+      Alert.alert("Error", "An error occurred while saving your drawing.");
     }
   };
 
@@ -140,7 +142,11 @@ export default function Draw() {
           />
           <Text
             variant="headlineSmall"
-            style={{ marginTop: 50, textAlign: "center", marginHorizontal: 20 }}
+            style={{
+              marginTop: 50,
+              textAlign: "center",
+              marginHorizontal: 20,
+            }}
           >
             You broke your streak! Draw a dino to make them happy again!
           </Text>
@@ -206,12 +212,22 @@ export default function Draw() {
           </View>
           <FAB
             icon="undo"
-            style={{ position: "absolute", margin: 16, right: 0, bottom: 0 }}
+            style={{
+              position: "absolute",
+              margin: 16,
+              right: 0,
+              bottom: 0,
+            }}
             onPress={handleUndo}
           />
           <FAB
             icon="check"
-            style={{ position: "absolute", margin: 16, right: 0, bottom: 70 }}
+            style={{
+              position: "absolute",
+              margin: 16,
+              right: 0,
+              bottom: 70,
+            }}
             onPress={() => setIsDialogVisible(true)}
           />
           <Portal>
@@ -222,14 +238,14 @@ export default function Draw() {
               <Dialog.Title>Are you sure?</Dialog.Title>
               <Dialog.Content>
                 <Text variant="bodyMedium">
-                  The dinos won’t be happy if this isn’t one of their friends...
+                  Do you want to save this drawing?
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
                 <Button onPress={() => setIsDialogVisible(false)}>
                   Cancel
                 </Button>
-                <Button onPress={sendDrawing}>Send</Button>
+                <Button onPress={saveDrawing}>Save</Button>
               </Dialog.Actions>
             </Dialog>
           </Portal>

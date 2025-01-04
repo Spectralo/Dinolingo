@@ -24,9 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
-        <data android:scheme="com.spectralo.dino"/>
         <data android:scheme="dinolingo"/>
+        <data android:scheme="com.spectralo.dino"/>
         <data android:scheme="exp+dinolingo"/>
       </intent-filter>
     </activity>
